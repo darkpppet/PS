@@ -1,0 +1,13 @@
+System.Console.WriteLine("NFC West       W   L  T");
+System.Console.WriteLine("-----------------------");
+System.Console.WriteLine("Seattle        13  3  0");
+System.Console.WriteLine("San Francisco  12  4  0");
+System.Console.WriteLine("Arizona        10  6  0");
+System.Console.WriteLine("St. Louis      7   9  0");
+System.Console.WriteLine();
+System.Console.WriteLine("NFC North      W   L  T");
+System.Console.WriteLine("-----------------------");
+System.Console.WriteLine("Green Bay      8   7  1");
+System.Console.WriteLine("Chicago        8   8  0");
+System.Console.WriteLine("Detroit        7   9  0");
+System.Console.WriteLine("Minnesota      5  10  1");
