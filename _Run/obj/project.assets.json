@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/workspace/_Baekjoon/run/run.csproj",
+      "projectUniqueName": "/workspace/_Baekjoon/_Run/run.csproj",
       "projectName": "run",
-      "projectPath": "/workspace/_Baekjoon/run/run.csproj",
+      "projectPath": "/workspace/_Baekjoon/_Run/run.csproj",
       "packagesPath": "/root/.nuget/packages/",
-      "outputPath": "/workspace/_Baekjoon/run/obj/",
+      "outputPath": "/workspace/_Baekjoon/_Run/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/root/.nuget/NuGet/NuGet.Config"
