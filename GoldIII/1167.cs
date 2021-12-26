@@ -1,23 +1,19 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
-int n = int.Parse(Console.ReadLine());
+int v = int.Parse(Console.ReadLine());
 
 Dictionary<int, Dictionary<int, int>> treeDic = new();
 
-for (int i = 1; i <= n; i++)
-    treeDic[i] = new() { [i] = 0 };
-
-for (int i = 0; i < n - 1; i++)
+for (int i = 1; i <= v; i++)
 {
-    string[] input = Console.ReadLine().Split(' ');
+    int[] input = Console.ReadLine().Split(' ').SkipLast(1).Select(x => int.Parse(x)).ToArray();
     
-    int parentNode = int.Parse(input[0]);
-    int childNode = int.Parse(input[1]);
-    int length = int.Parse(input[2]);
+    treeDic[input[0]] = new();
     
-    treeDic[parentNode][childNode] = length;
-    treeDic[childNode][parentNode] = length;
+    for (int j = 1; j < input.Count(); j += 2)
+        treeDic[input[0]][input[j]] = input[j + 1];
 }
 
 HashSet<int> history = new();
