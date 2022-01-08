@@ -13,11 +13,11 @@ for (int i = 0; i < n; i++)
         map[i, j] = row[j];
 }
 
-List<(int I, int J, bool IsBreak)> before = new() { (0, 0, false) };
+HashSet<(int I, int J, bool IsBreak)> before = new() { (0, 0, false) };
 int length = 1;
 bool isFind = false;
 
-void Check(List<(int I, int J, bool IsBreak)> beforeList, int i, int j, bool isBreak)
+void Check(HashSet<(int I, int J, bool IsBreak)> beforeList, int i, int j, bool isBreak)
 {
     if (i >= 0 && i < n && j >= 0 && j < m)
     {
@@ -32,7 +32,7 @@ void Check(List<(int I, int J, bool IsBreak)> beforeList, int i, int j, bool isB
 
 do
 {
-    List<(int I, int J, bool IsBreak)> tempBefore = new();
+    HashSet<(int I, int J, bool IsBreak)> tempBefore = new();
     
     foreach (var tuple in before)
     {
