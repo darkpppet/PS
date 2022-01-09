@@ -10,7 +10,11 @@ for (int i = 0; i < m; i++)
 {
     string[] route = Console.ReadLine().Split();
     
-    routes[int.Parse(route[0])][int.Parse(route[1])] = long.Parse(route[2]);
+    int start = int.Parse(route[0]);
+    int end = int.Parse(route[1]);
+    long cost = int.Parse(route[2]);
+    
+    routes[start][end] = routes[start].ContainsKey(end) ? Math.Min(routes[start][end], cost) : cost;
 }
 
 string[] input = Console.ReadLine().Split();
