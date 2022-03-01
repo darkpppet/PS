@@ -1,0 +1,4 @@
+_Run/
+.vscode/
+*.sh
+goorm.manifest
