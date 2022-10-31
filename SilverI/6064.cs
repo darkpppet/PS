@@ -1,10 +1,8 @@
-using System;
-
 int t = int.Parse(Console.ReadLine());
 
 for (int i = 0; i < t; i++)
 {
-	string[] input = Console.ReadLine().Split(' ');
+	string[] input = Console.ReadLine().Split();
 	
 	int m = int.Parse(input[0]);
 	int n = int.Parse(input[1]);
