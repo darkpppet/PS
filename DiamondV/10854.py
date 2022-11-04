@@ -109,31 +109,14 @@ def factorization(n):
     else:
         factorization(b)
 
-t = int(input())
+num = int(input())
 
-for _ in range(t):
-    num = int(input())
+while num % 2 == 0:
+    append_to_dictionary(2)
+    num //= 2
 
-    if num == 4:
-        print(1)
-        continue
-    elif num % 4 == 0:
-        print(-1)
-        continue
+factorization(num)
 
-    prime_factors = {}
-    while num % 2 == 0:
-        append_to_dictionary(2)
-        num //= 2
+prod = math.prod([x+1 for x in prime_factors.values()])
 
-    factorization(num)
-
-    is_inf = False
-    for key in prime_factors.keys():
-        if (key == 2 and prime_factors[key] >= 3) or (prime_factors[key] >= 2):
-            is_inf = True
-            print(-1)
-            break
-
-    if not is_inf:
-        print(math.factorial(len(prime_factors)))
+print(prod)

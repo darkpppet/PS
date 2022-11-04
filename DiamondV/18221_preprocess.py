@@ -10,7 +10,7 @@ def is_prime(n):
     d, s = find_d_and_s(n_minus_1)
 
     is_n_prime = check_is_prime_with_a(n, d, s, 2)
-    for i in [3, 5, 7, 11, 13, 17, 31, 61, 73]:
+    for i in [2, 7, 61]:
         if n > i and is_n_prime:
             is_n_prime &= check_is_prime_with_a(n, d, s, i)
         else:
@@ -78,20 +78,14 @@ def rho(n, x0=2, c=1):
     else:
         return d
 
-prime_factors = {}
-
-def append_to_dictionary(n):
-    if n in prime_factors.keys():
-        prime_factors[n] += 1
-    else:
-        prime_factors[n] = 1
+prime_factors = []
 
 def factorization(n):
     if n <= 1:
         return
 
     if is_prime(n):
-        append_to_dictionary(n)
+        prime_factors.append(n)
         return
 
     a = rho(n)
@@ -100,40 +94,57 @@ def factorization(n):
     b = n // a
 
     if is_prime(a):
-        append_to_dictionary(a)
+        prime_factors.append(a)
     else:
         factorization(a)
 
     if is_prime(b):
-        append_to_dictionary(b)
+        prime_factors.append(b)
     else:
         factorization(b)
 
-t = int(input())
+start = 906_150_257
+end = 906_488_079
+even_count = 0
+odd_count = 0
 
-for _ in range(t):
-    num = int(input())
+# 906,150,257 ~ 906,488,079
+even_list = []
+for i in range(start, end+1):
+    prime_factors = []
+    num = i
 
-    if num == 4:
-        print(1)
-        continue
-    elif num % 4 == 0:
-        print(-1)
-        continue
-
-    prime_factors = {}
     while num % 2 == 0:
-        append_to_dictionary(2)
+        prime_factors.append(2)
         num //= 2
 
     factorization(num)
 
-    is_inf = False
-    for key in prime_factors.keys():
-        if (key == 2 and prime_factors[key] >= 3) or (prime_factors[key] >= 2):
-            is_inf = True
-            print(-1)
-            break
+    if len(prime_factors) % 2 == 0:
+        odd_count += 1
+    else:
+        even_count += 1
 
-    if not is_inf:
-        print(math.factorial(len(prime_factors)))
+    if even_count < odd_count:
+        even_list.append(i)
+
+result = []
+
+start = even_list[0]
+end = even_list[0]
+before = even_list[0]
+for i in range(1, len(even_list)):
+    if even_list[i] - before == 1:
+        before = even_list[i]
+    else:
+        end = before
+        result.append((start, end))
+        start = even_list[i]
+        end = even_list[i]
+        before = even_list[i]
+result.append((start, before))
+
+with open('18221_out.txt', 'w') as file:
+    file.write('even_list = [')
+    file.write(', '.join([f'({x[0]}, {x[1]})' for x in result]))
+    file.write(']')
