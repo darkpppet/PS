@@ -58,7 +58,6 @@ def e(x, y, z):
         return 1
 
     phi_z = phi(z)
-    if  >= phi_z
     return pow_mod(x%z, (e(x, y-1, phi_z) + phi_z), z)
 
 while True:
