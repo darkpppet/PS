@@ -1,214 +1,192 @@
 import math
 
-class MillerRabin:
-    __a_list = [3, 5, 7, 11, 13, 17, 31, 61, 73]
+def is_prime(n):
+    if n <= 1:
+        return False
+    if n == 2:
+        return True
 
-    @classmethod
-    def is_prime(cls, n):
-        if n <= 1:
-            return False
-        if n == 2:
-            return True
+    n_minus_1 = n-1
+    d, s = find_d_and_s(n_minus_1)
 
-        n_minus_1 = n-1
-        d, s = cls.__find_d_and_s(n_minus_1)
+    is_n_prime = check_is_prime_with_a(n, d, s, 2)
+    for i in [3, 5, 7, 11, 13, 17, 31, 61, 73]:
+        if n > i and is_n_prime:
+            is_n_prime &= check_is_prime_with_a(n, d, s, i)
+        else:
+            break
 
-        is_n_prime = cls.__check_is_prime_with_a(n, d, s, 2)
-        for i in cls.__a_list:
-            if n > i and is_n_prime:
-                is_n_prime &= cls.__check_is_prime_with_a(n, d, s, i)
-            else:
-                break
+    return is_n_prime
 
-        return is_n_prime
+def check_is_prime_with_a(n, d, s, a):
+    is_prime_with_a = False
+    if pow_mod(a, d, n) == 1:
+        is_prime_with_a = True
 
-    def __check_is_prime_with_a(self, n, d, s, a):
-        is_prime_with_a = False
-        if self.__pow_mod(a, d, n) == 1:
+    for r in range(s):
+        if is_prime_with_a or pow_mod(a, d*pow(2, r), n) == n-1:
             is_prime_with_a = True
+            break
 
-        for r in range(s):
-            if is_prime_with_a or self.__pow_mod(a, d*pow(2, r), n) == n-1:
-                is_prime_with_a = True
-                break
+    return is_prime_with_a
 
-        return is_prime_with_a
+def find_d_and_s(n_minus_1):
+    s = 0
+    while n_minus_1 % 2 == 0:
+        n_minus_1 //= 2
+        s += 1
+    d = n_minus_1
 
-    def __find_d_and_s(self, n_minus_1):
-        s = 0
-        while n_minus_1 % 2 == 0:
-            n_minus_1 //= 2
-            s += 1
-        d = n_minus_1
+    return d, s
 
-        return d, s
+def pow_mod(a, exp, n):
+    if exp == 0:
+        return 1
+    if exp == 1:
+        return a % n
 
-    def __pow_mod(self, a, exp, n):
-        if exp == 0:
-            return 1
-        if exp == 1:
-            return a % n
+    sqrt = pow_mod(a, exp//2, n)
+    pre_result = (sqrt*sqrt) % n
 
-        sqrt = self.__pow_mod(a, exp//2, n)
-        pre_result = (sqrt*sqrt) % n
+    if exp%2 == 0:
+        return pre_result
+    else:
+        return (pre_result*a) % n
 
-        if exp%2 == 0:
-            return pre_result
-        else:
-            return (pre_result*a) % n
+def g(x, n, c=1):
+    return (x*x + c) % n
 
-class PollardRho:
-    prime_factors_list = []
-    prime_factors_dict = {}
+def rho(n, x0=2, c=1):
+    x = x0
+    y = x0
+    d = 1
 
-    def factorization(self, n):
-        if n <= 1:
-            return
+    while d == 1:
+        x = g(x, n, c)
+        y = g(g(y, n, c), n, c)
+        d = math.gcd(abs(x-y), n)
 
-        if MillerRabin.is_prime(n):
-            self.prime_factors_list.append(n)
-            self.__append_to_dict(n)
-            return
-
-        while n % 2 == 0:
-            self.prime_factors_list.append(2)
-            self.__append_to_dict(2)
-            n //= 2
-
-        a = self.__rho(n)
-        if a is False:
-            return
-        b = n // a
-
-        if MillerRabin.is_prime(a):
-            self.prime_factors_list.append(a)
-            self.__append_to_dict(a)
-        else:
-            self.factorization(a)
-
-        if MillerRabin.is_prime(b):
-            self.prime_factors_list.append(b)
-            self.__append_to_dict(b)
-        else:
-            self.factorization(b)
-
-    def __append_to_dict(self, n):
-        if not n in self.prime_factors_dict.keys():
-            self.prime_factors_dict[n] = 1
-        else:
-            self.prime_factors_dict[n] += 1
-
-    def __rho(self, n, x0=2, c=1):
-        x = x0
-        y = x0
-        d = 1
-
-        while d == 1:
-            x = self.__g(x, n, c)
-            y = self.__g(self.__g(y, n, c), n, c)
-            d = math.gcd(abs(x-y), n)
-
-        if d == n:
-            if c == 1:
-                return self.__rho(n, x0, -1)
-            elif c == -1:
-                return self.__rho(n, x0, 2)
-            elif x0 < 20:
-                return self.__rho(n, x0+1, 1)
-            else:
-                return False
-        else:
-            return d
-
-    def __g(self, x, n, c=1):
-        return (x*x + c) % n
-
-class Checker:
-    def __init__(self, prime_factor_dict):
-        self.prime_factor_dict = prime_factor_dict
-
-    def is_count_1(self):
-        result = True
-        for factor_count in self.prime_factor_dict.values():
-            if factor_count % 2 != 0:
-                result = False
-                break
-        return result
-
-    def is_count_2(self):
-        result = True
-        for factor in self.prime_factor_dict.keys():
-            if factor % 4 == 3 and self.prime_factor_dict[factor] % 2 != 0:
-                result = False
-                break
-        return result
-
-    def is_count_3(self, n):
-        while n % 4 == 0:
-            n //= 4
-        if n % 8 != 7:
-            return True
+    if d == n:
+        if c == 1:
+            return rho(n, x0, -1)
+        elif c == -1:
+            return rho(n, x0, 2)
+        elif x0 < 20:
+            return rho(n, x0+1, 1)
         else:
             return False
+    else:
+        return d
 
-    def is_count_4(self, n):
-        while n % 4 == 0:
-            n //= 4
-        if n % 8 == 7:
-            return True
-        else:
-            return False
+prime_factors = {}
+def factorization(n):
+    if n <= 1:
+        return
 
-class SquaresFinder:
-    def find_1_squares(self, n):
-        return round(math.sqrt(n))
+    if is_prime(n):
+        append_prime_factor(n)
+        return
 
-    def find_2_squares(self, n):
-        x, y = 1, 1
-        return x, y
+    a = rho(n)
+    if a is False:
+        return
+    b = n // a
 
-    def find_3_squares(self, n):
-        t = 1
+    if is_prime(a):
+        append_prime_factor(a)
+    else:
+        factorization(a)
 
-        while True:
-            r = PollardRho()
-            r.factorization(n - t*t)
-            c = Checker(r.prime_factors_dict)
-            if c.is_count_2():
-                x, y = self.find_2_squares(n - t*t)
-                break
+    if is_prime(b):
+        append_prime_factor(b)
+    else:
+        factorization(b)
 
-        return x, y, t
+def append_prime_factor(f):
+    if not f in prime_factors.keys():
+        prime_factors[f] = 1
+    else:
+        prime_factors[f] += 1
 
-    def find_4_squares(self, n):
-        a = 0
-        while n % 4 == 0:
-            a += 1
-            n //= 4
+def check_2(n):
+    is_count_2 = True
+    for factor in prime_factors.keys():
+        if factor % 4 == 3 and prime_factors[factor] % 2 != 0:
+            is_count_2 = False
+            break
+    return is_count_2
 
-        power_2_to_a = 2 ** a
-        x, y, z = self.find_3_squares(n)
+def tonelli_shanks(p):
+    q = p-1
+    s = 0
+    while q % 2 == 0:
+        q //= 2
+        s += 1
 
-        return x * power_2_to_a, y * power_2_to_a, z * power_2_to_a, power_2_to_a
+    if ((q+1) / 2) % 2 == 0:
+        r = 1
+    else:
+        r = -1
+    t = -1
 
-factorizator = PollardRho()
+    # Find b from the table such that b^2 === t and set r === r/b
+    # return r
+
+
+
+
+
+def decompose_2(n):
+
+
+
+    return 0, 0
+
+def decompose_3(n):
+    t = 1
+    while not check_2(n - t*t):
+        t += 1
+    a, b = decompose_2(n - t*t)
+    return a, b, t
 
 num = int(input())
 
-factorizator.factorization(num)
+factorization(num)
 
-checker = Checker(factorizator.prime_factors_dict)
-finder = SquaresFinder()
+is_count_1 = True
+for factor_count in prime_factors.values():
+    if factor_count % 2 != 0:
+        is_count_1 = False
+        break
 
-if checker.is_count_1():
+if is_count_1:
     print(1)
-    print(finder.find_1_squares(num))
-elif checker.is_count_2():
+    print(int(math.sqrt(num)))
+    exit(0)
+
+is_count_2 = True
+for factor in prime_factors.keys():
+    if factor % 4 == 3 and prime_factors[factor] % 2 != 0:
+        is_count_2 = False
+        break
+
+if is_count_2:
     print(2)
-    print(finder.find_2_squares(num))
-elif checker.is_count_3(num):
+    a, b = decompose_2(num)
+    print(a, b)
+    exit(0)
+
+factor_4 = 1
+is_count_3= True
+while num % 4 == 0:
+    num //= 4
+    factor_4 *= 4
+
+if num % 8 != 7:
     print(3)
-    print(finder.find_3_squares(num))
+    x, y, z = decompose_3(num)
+    print(x, y, z)
 else:
     print(4)
-    print(finder.find_4_squares(num))
+    x, y, z = [o*factor_4 for o in decompose_3(num - 1)]
+    print(x, y, z, factor_4)
