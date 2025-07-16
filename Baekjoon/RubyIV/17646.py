@@ -130,17 +130,34 @@ def tonelli_shanks(p):
     t = -1
 
     # Find b from the table such that b^2 === t and set r === r/b
-    # return r
+    return r
 
 
 
 
 
 def decompose_2(n):
+    g2 = 1
+    for f in prime_factors.keys():
+        temp = pow(f, (prime_factors[f]//2) * 2)
+        g2 *= temp
+        n /= temp
 
+    r0 = tonelli_shanks(n)
+    r0 = n-r0 if r0 > n/2 else r0
+    r1 = n % r0
+    r2 = r0 % r1
 
+    while r2 < math.sqrt(n):
+        r0 = r1
+        r1 = r2
+        r2 = r0 % r1
 
-    return 0, 0
+    s = math.isqrt(n - r2*r2)
+    if s*s == n - r2*r2:
+        return g2*r2, g2*s
+    else:
+        return False
 
 def decompose_3(n):
     t = 1
