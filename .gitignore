@@ -1,4 +1,7 @@
 .idea/
+.vscode/
+.vs/
+
 cmake-build-debug/
 CMakeLists.txt
 
