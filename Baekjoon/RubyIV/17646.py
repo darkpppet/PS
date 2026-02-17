@@ -1,120 +1,120 @@
 import math
 
-def is_prime(n):
-    if n <= 1:
+class Prime:
+    @classmethod
+    def __pow_mod(cls, a, exp, n):
+        if exp == 0:
+            return 1
+        if exp == 1:
+            return a % n
+
+        sqrt = cls.__pow_mod(a, exp//2, n)
+        pre_result = (sqrt*sqrt) % n
+        if exp%2 != 0:
+            pre_result *= a
+            pre_result %= n
+
+        return pre_result
+
+
+    @staticmethod
+    def __find_d_and_s(n_minus_1):
+        s = 0
+        while n_minus_1 % 2 == 0:
+            n_minus_1 //= 2
+            s += 1
+        d = n_minus_1
+
+        return d, s
+
+    @classmethod
+    def __check_is_prime_with_a(cls, n, d, s, a):
+        if cls.__pow_mod(a, d, n) == 1:
+            return True
+
+        for r in range(s):
+            if cls.__pow_mod(a, d*pow(2, r), n) == n-1:
+                return True
+
         return False
-    if n == 2:
+
+    @classmethod
+    def check(cls, n):
+        if n <= 1:
+            return False
+        if n == 2:
+            return True
+
+        d, s = cls.__find_d_and_s(n-1)
+        for i in [2, 3, 5, 7, 11, 13, 17, 31, 61, 73]:
+            if n <= i:
+                break
+
+            if not cls.__check_is_prime_with_a(n, d, s, i):
+                return False
+
         return True
 
-    n_minus_1 = n-1
-    d, s = find_d_and_s(n_minus_1)
+class Factorization:
+    @staticmethod
+    def __g(x, n, c=1):
+        return (x*x + c) % n
 
-    is_n_prime = check_is_prime_with_a(n, d, s, 2)
-    for i in [3, 5, 7, 11, 13, 17, 31, 61, 73]:
-        if n > i and is_n_prime:
-            is_n_prime &= check_is_prime_with_a(n, d, s, i)
+    @classmethod
+    def __rho(cls, n, x0=2, c=1):
+        x = x0
+        y = x0
+        d = 1
+
+        while d == 1:
+            x = cls.__g(x, n, c)
+            y = cls.__g(cls.__g(y, n, c), n, c)
+            d = math.gcd(abs(x-y), n)
+
+        if d == n:
+            if c == 1:
+                return cls.__rho(n, x0, -1)
+            elif c == -1:
+                return cls.__rho(n, x0, 2)
+            elif x0 < 20:
+                return cls.__rho(n, x0+1, 1)
+            else:
+                return False
         else:
-            break
+            return d
 
-    return is_n_prime
-
-def check_is_prime_with_a(n, d, s, a):
-    is_prime_with_a = False
-    if pow_mod(a, d, n) == 1:
-        is_prime_with_a = True
-
-    for r in range(s):
-        if is_prime_with_a or pow_mod(a, d*pow(2, r), n) == n-1:
-            is_prime_with_a = True
-            break
-
-    return is_prime_with_a
-
-def find_d_and_s(n_minus_1):
-    s = 0
-    while n_minus_1 % 2 == 0:
-        n_minus_1 //= 2
-        s += 1
-    d = n_minus_1
-
-    return d, s
-
-def pow_mod(a, exp, n):
-    if exp == 0:
-        return 1
-    if exp == 1:
-        return a % n
-
-    sqrt = pow_mod(a, exp//2, n)
-    pre_result = (sqrt*sqrt) % n
-
-    if exp%2 == 0:
-        return pre_result
-    else:
-        return (pre_result*a) % n
-
-def g(x, n, c=1):
-    return (x*x + c) % n
-
-def rho(n, x0=2, c=1):
-    x = x0
-    y = x0
-    d = 1
-
-    while d == 1:
-        x = g(x, n, c)
-        y = g(g(y, n, c), n, c)
-        d = math.gcd(abs(x-y), n)
-
-    if d == n:
-        if c == 1:
-            return rho(n, x0, -1)
-        elif c == -1:
-            return rho(n, x0, 2)
-        elif x0 < 20:
-            return rho(n, x0+1, 1)
+    @classmethod
+    def __append_prime_factor(cls, f, prime_factors):
+        if not f in prime_factors.keys():
+            prime_factors[f] = 1
         else:
-            return False
-    else:
-        return d
+            prime_factors[f] += 1
 
-prime_factors = {}
-def factorization(n):
-    if n <= 1:
-        return
+    @classmethod
+    def do(cls, n, prime_factors):
+        if n <= 1:
+            return
 
-    if is_prime(n):
-        append_prime_factor(n)
-        return
+        if Prime.check(n):
+            cls.__append_prime_factor(n, prime_factors)
+            return
 
-    a = rho(n)
-    if a is False:
-        return
-    b = n // a
+        a = cls.__rho(n)
+        if a is False:
+            return
 
-    if is_prime(a):
-        append_prime_factor(a)
-    else:
-        factorization(a)
+        b = n // a
 
-    if is_prime(b):
-        append_prime_factor(b)
-    else:
-        factorization(b)
+        if Prime.check(a):
+            cls.__append_prime_factor(a, prime_factors)
+        else:
+            Factorization.do(a, prime_factors)
 
-def append_prime_factor(f):
-    if not f in prime_factors.keys():
-        prime_factors[f] = 1
-    else:
-        prime_factors[f] += 1
+        if Prime.check(b):
+            cls.__append_prime_factor(b, prime_factors)
+        else:
+            Factorization.do(b, prime_factors)
 
-def check_2(n):
-    is_count_2 = True
-    for factor in prime_factors.keys():
-        if factor % 4 == 3 and prime_factors[factor] % 2 != 0:
-            is_count_2 = False
-            break
-    return is_count_2
 
 def tonelli_shanks(p):
     q = p-1
@@ -132,78 +132,80 @@ def tonelli_shanks(p):
     # Find b from the table such that b^2 === t and set r === r/b
     return r
 
+class One:
+    @staticmethod
+    def check(prime_factors):
+        for factor_count in prime_factors.values():
+            if factor_count % 2 != 0:
+                return False
+        return True
 
+    @staticmethod
+    def decompose(num):
+        return int(math.sqrt(num))
 
+class Two:
+    @staticmethod
+    def check(prime_factors):
+        for factor in prime_factors.keys():
+            if factor % 4 == 3 and prime_factors[factor] % 2 != 0:
+                return False
+        return True
 
+    @staticmethod
+    def decompose(num):
+        a, b = 0, 0
+        return a, b
 
-def decompose_2(n):
-    g2 = 1
-    for f in prime_factors.keys():
-        temp = pow(f, (prime_factors[f]//2) * 2)
-        g2 *= temp
-        n /= temp
+class Three:
+    @staticmethod
+    def check(num):
+        while num % 4 == 0:
+            num //= 4
+        return num % 8 != 7
 
-    r0 = tonelli_shanks(n)
-    r0 = n-r0 if r0 > n/2 else r0
-    r1 = n % r0
-    r2 = r0 % r1
+    @staticmethod
+    def decompose(num):
+        t = 1
+        while not Two.check(num - t*t):
+            t += 1
+        a, b = Two.decompose(num - t*t)
+        return a, b, t
 
-    while r2 < math.sqrt(n):
-        r0 = r1
-        r1 = r2
-        r2 = r0 % r1
+class Four:
+    @staticmethod
+    def decompose(num):
+        sqrt_factor_4 = 1
+        while num % 4 == 0:
+            num //= 4
+            sqrt_factor_4 *= 2
+        x, y, z = Three.decompose(num/(sqrt_factor_4*sqrt_factor_4) - 1)
+        return x, y, z, sqrt_factor_4
 
-    s = math.isqrt(n - r2*r2)
-    if s*s == n - r2*r2:
-        return g2*r2, g2*s
-    else:
-        return False
+def main():
+    num = int(input())
 
-def decompose_3(n):
-    t = 1
-    while not check_2(n - t*t):
-        t += 1
-    a, b = decompose_2(n - t*t)
-    return a, b, t
+    prime_factors = {}
+    Factorization.do(num, prime_factors)
 
-num = int(input())
+    if One.check(prime_factors):
+        print(1)
+        print(One.decompose(num))
+        exit(0)
 
-factorization(num)
+    if Two.check(prime_factors):
+        print(2)
+        print(Two.decompose(num))
+        exit(0)
 
-is_count_1 = True
-for factor_count in prime_factors.values():
-    if factor_count % 2 != 0:
-        is_count_1 = False
-        break
+    if Three.check(num):
+        print(3)
+        print(Three.decompose(num))
+        exit(0)
 
-if is_count_1:
-    print(1)
-    print(int(math.sqrt(num)))
-    exit(0)
-
-is_count_2 = True
-for factor in prime_factors.keys():
-    if factor % 4 == 3 and prime_factors[factor] % 2 != 0:
-        is_count_2 = False
-        break
-
-if is_count_2:
-    print(2)
-    a, b = decompose_2(num)
-    print(a, b)
-    exit(0)
-
-factor_4 = 1
-is_count_3= True
-while num % 4 == 0:
-    num //= 4
-    factor_4 *= 4
-
-if num % 8 != 7:
-    print(3)
-    x, y, z = decompose_3(num)
-    print(x, y, z)
-else:
     print(4)
-    x, y, z = [o*factor_4 for o in decompose_3(num - 1)]
-    print(x, y, z, factor_4)
+    print(Four.decompose(num))
+    exit(0)
+
+if __name__ == '__main__':
+    main()
