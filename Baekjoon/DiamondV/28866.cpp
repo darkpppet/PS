@@ -44,13 +44,13 @@ constexpr int reverseBit(int bit, const int len)
     return result;
 }
 
-constexpr long long getTwoB(long long p)
+constexpr long long getTwoB(long long pn)
 {
     long long result = 1;
-    p -= 1;
-    while (p % 2 == 0)
+    pn -= 1;
+    while (pn % 2 == 0)
     {
-        p /= 2;
+        pn /= 2;
         result *= 2;
     }
     return result;
@@ -108,11 +108,19 @@ constexpr long long getInverseP(const long long kFFTSize)
     return powMod(kFFTSize, p - 2, p);
 }
 
-constexpr int kFFTSize = 1 << 18;
+constexpr int kFFTSize = 1 << 17;
 constexpr long long kInverseP = getInverseP(kFFTSize);
 constexpr int maxIndex = 50000;
 
-void polyMultiply(vector<long long>& seq, vector<long long> seq2, const int limit)
+void polyTrunc(vector<long long>& seq)
+{
+    for (int i = 0; i <= maxIndex; i++)
+        seq[i] = (seq[i] * kInverseP) % p;
+    for (int i = maxIndex + 1; i < kFFTSize; i++)
+        seq[i] = 0;
+}
+
+void polyMultiply(vector<long long>& seq, vector<long long> seq2)
 {
     ntt(seq);
     ntt(seq2);
@@ -120,40 +128,33 @@ void polyMultiply(vector<long long>& seq, vector<long long> seq2, const int limi
         seq[i] = (seq[i] * seq2[i]) % p;
     intt(seq);
 
-    for (int i = 0; i <= limit; i++)
-        seq[i] = (seq[i] * kInverseP) % p;
-    for (int i = limit + 1; i < kFFTSize; i++)
-        seq[i] = 0;
+    polyTrunc(seq);
 }
 
-void polySquare(vector<long long>& seq, const int limit)
+void polySquare(vector<long long>& seq)
 {
     ntt(seq);
     for (int i = 0; i < kFFTSize; i++)
         seq[i] = (seq[i] * seq[i]) % p;
     intt(seq);
 
-    for (int i = 0; i <= limit; i++)
-        seq[i] = (seq[i] * kInverseP) % p;
-    for (int i = limit + 1; i < kFFTSize; i++)
-        seq[i] = 0;
+    polyTrunc(seq);
 }
 
-vector<long long> polyPow(vector<long long> base, int k, const int limit)
+void polyPow(vector<long long>& seq, int k)
 {
-    vector<long long> res(kFFTSize);
-    res[0] = 1;
+    vector<long long> temp(kFFTSize);
+    temp[0] = 1;
 
     while (k > 0)
     {
         if (k & 1)
-            polyMultiply(res, base, limit);
-        if (k > 1)
-            polySquare(base, limit);
+            polyMultiply(temp, seq);
+        polySquare(seq);
         k >>= 1;
     }
 
-    return res;
+    swap(temp, seq);
 }
 
 int main()
@@ -173,25 +174,17 @@ int main()
         seq[temp] += 1;
     }
 
-    seq = polyPow(seq, k, maxIndex);
+    polyPow(seq, k);
 
     seq[0] = 0;
-    for (int i = 1; i < kFFTSize; i++)
-    {
-        if (i > maxIndex)
-        {
-            seq[i] = seq[i - 1];
-            continue;
-        }
-
+    for (int i = 1; i <= maxIndex; i++)
         seq[i] = (seq[i - 1] + seq[i]) % p;
-    }
 
     for (int i = 0; i < q; i++)
     {
         int l, r;
         cin >> l >> r;
 
-        cout << (seq[r] - seq[l - 1]) % p << '\n';
+        cout << (seq[r] - seq[l - 1] + p) % p << '\n';
     }
 }
